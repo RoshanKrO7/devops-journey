@@ -78,6 +78,20 @@ check_disk
 check_services
 top_processes
 
-echo -e "\n=========================================="
+check_network() {
+    echo -e "\n[Network Check]:"
+    if ping -c 1 google.com &> /dev/null; then
+        echo -e "${GREEN}OK: Internet is reachable${NC}"
+    else
+        echo -e "${RED}DOWN: No internet connection${NC}"
+    fi
+
+    echo "Open ports:"
+    ss -tuln | grep LISTEN | awk '{print $5}' | tail -n 5
+}
+
+check_network
+
+echo -e  "\n=========================================="
 echo "Report complete!"
 echo "=========================================="
