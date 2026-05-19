@@ -70,14 +70,6 @@ top_processes() {
     ps aux --sort=-%cpu | awk 'NR==2,NR==4 {print $1, $3"%", $11}'
 }
 
-# Run all checks
-print_header
-check_cpu
-check_memory
-check_disk
-check_services
-top_processes
-
 check_network() {
     echo -e "\n[Network Check]:"
     if ping -c 1 google.com &> /dev/null; then
@@ -90,8 +82,42 @@ check_network() {
     ss -tuln | grep LISTEN | awk '{print $5}' | tail -n 5
 }
 
-check_network
+usage() {
+    echo "Usage: ./health-monitor.sh [option]"
+    echo ""
+    echo "Options:"
+    echo "  --report    Run full health check (default)"
+    echo "  --cpu       Check CPU only"
+    echo "  --memory    Check memory only"
+    echo "  --disk      Check disk only"
+    echo "  --network   Check network only"
+    echo "  --help      Show this help message"
+}
 
-echo -e  "\n=========================================="
-echo "Report complete!"
-echo "=========================================="
+# ---- Run ----
+OPTION=${1:-"--report"}
+
+case $OPTION in
+    --report)
+        print_header
+        check_cpu
+        check_memory
+        check_disk
+        check_services
+        top_processes
+        check_network
+        echo -e "\n=========================================="
+        echo "Report complete!"
+        echo "=========================================="
+        ;;
+    --cpu)     print_header; check_cpu ;;
+    --memory)  print_header; check_memory ;;
+    --disk)    print_header; check_disk ;;
+    --network) print_header; check_network ;;
+    --help)    usage ;;
+    *)
+        echo "Unknown option: $OPTION"
+        usage
+        exit 1
+        ;;
+esac
